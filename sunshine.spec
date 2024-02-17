@@ -1,9 +1,9 @@
-%define commit 69a3edd9b01c76aa44fd5c2a29de1c3b3722cb41
+%define commit 56da68c8632c3395c49fdecd5731ccd4421e760b
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 %global build_timestamp %(date +"%Y%m%d")
 
-%global rel_build 1.git.%{build_timestamp}.%{shortcommit}%{?dist}
+%global rel_build 2.git.%{build_timestamp}.%{shortcommit}%{?dist}
 
 Name:           sunshine
 Version:        0.21.0
@@ -102,7 +102,7 @@ fi
 %files
 # Executables
 %{_bindir}/sunshine
-%{_bindir}/sunshine-0.21.0.69a3edd
+%{_bindir}/sunshine-0.21.0.%{shortcommit}
 
 # Systemd unit file for user services
 %{_userunitdir}/sunshine.service
