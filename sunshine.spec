@@ -1,9 +1,9 @@
-%define commit 56da68c8632c3395c49fdecd5731ccd4421e760b
+%define commit d1a635809ac8cf7b16913479648d067159119e97
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 %global build_timestamp %(date +"%Y%m%d")
 
-%global rel_build 2.git.%{build_timestamp}.%{shortcommit}%{?dist}
+%global rel_build 3.git.%{build_timestamp}.%{shortcommit}%{?dist}
 
 Name:           sunshine
 Version:        0.21.0
@@ -76,10 +76,34 @@ git checkout %{commit}
 git submodule update --init --recursive
 npm install
 
+# install cuda
+WORKDIR /build/cuda
+# versions: https://developer.nvidia.com/cuda-toolkit-archive
+ENV CUDA_VERSION="12.3.2"
+ENV CUDA_BUILD="525.60.13"
+# hadolint ignore=SC3010
+RUN <<_INSTALL_CUDA
+#!/bin/bash
+set -e
+cuda_prefix="https://developer.download.nvidia.com/compute/cuda/"
+cuda_suffix=""
+if [[ "${TARGETPLATFORM}" == 'linux/arm64' ]]; then
+  cuda_suffix="_sbsa"
+fi
+url="${cuda_prefix}${CUDA_VERSION}/local_installers/cuda_${CUDA_VERSION}_${CUDA_BUILD}_linux${cuda_suffix}.run"
+echo "cuda url: ${url}"
+wget "$url" --progress=bar:force:noscroll -q --show-progress -O ./cuda.run
+chmod a+x ./cuda.run
+./cuda.run --silent --toolkit --toolkitpath=/build/cuda --no-opengl-libs --no-man-page --no-drm
+rm ./cuda.run
+_INSTALL_CUDA
+
 %build
 # Set up the build directory and run cmake and make
 cd Sunshine
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DSUNSHINE_ASSETS_DIR=share/sunshine -DSUNSHINE_EXECUTABLE_PATH=/usr/bin/sunshine -DSUNSHINE_ENABLE_WAYLAND=ON -DSUNSHINE_ENABLE_X11=ON -DSUNSHINE_ENABLE_DRM=ON -DSUNSHINE_ENABLE_CUDA=OFF
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_CUDA_COMPILER:PATH=/build/cuda/bin/nvcc -DSUNSHINE_ASSETS_DIR=share/sunshine -DSUNSHINE_EXECUTABLE_PATH=/usr/bin/sunshine -DSUNSHINE_ENABLE_WAYLAND=ON -DSUNSHINE_ENABLE_X11=ON -DSUNSHINE_ENABLE_DRM=ON -DSUNSHINE_ENABLE_CUDA=ON
 %make_build
 
 
