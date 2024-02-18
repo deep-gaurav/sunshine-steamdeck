@@ -76,9 +76,14 @@ git checkout %{commit}
 git submodule update --init --recursive
 npm install
 
+%build
+# Set up the build directory and run cmake and make
+cd Sunshine
+mkdir -p build
+cd build
 # Prepare the directory for CUDA installation
-mkdir -p /build/cuda
-cd /build/cuda
+mkdir -p cuda
+cd cuda
 
 # Set environment variables
 export CUDA_VERSION="12.3.2"
@@ -98,10 +103,8 @@ chmod +x cuda.run
 ./cuda.run --silent --toolkit --toolkitpath=/build/cuda --no-opengl-libs --no-man-page --no-drm
 rm cuda.run
 
-%build
-# Set up the build directory and run cmake and make
-cd Sunshine
-cd build
+cd ..
+
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_CUDA_COMPILER:PATH=/build/cuda/bin/nvcc -DSUNSHINE_ASSETS_DIR=share/sunshine -DSUNSHINE_EXECUTABLE_PATH=/usr/bin/sunshine -DSUNSHINE_ENABLE_WAYLAND=ON -DSUNSHINE_ENABLE_X11=ON -DSUNSHINE_ENABLE_DRM=ON -DSUNSHINE_ENABLE_CUDA=ON
 %make_build
 
