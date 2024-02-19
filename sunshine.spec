@@ -1,4 +1,4 @@
-%define commit d1a635809ac8cf7b16913479648d067159119e97
+%define commit e7eaa3ab636d8721de0869f8de527dd7b1de8a3b
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 %global build_timestamp %(date +"%Y%m%d")
@@ -70,47 +70,35 @@ Sunshine is a self-hosted game stream host for Moonlight. Offering low latency, 
 
 
 %prep
-git clone --single-branch --branch nightly https://github.com/LizardByte/Sunshine.git
+git clone --single-branch --branch nightly https://github.com/matte-schwartz/Sunshine.git
 cd Sunshine
 git checkout %{commit}
 git submodule update --init --recursive
 npm install
 
+
 %build
 # Set up the build directory and run cmake and make
 cd Sunshine
-mkdir -p build
+mkdir build
 cd build
-# Prepare the directory for CUDA installation
-mkdir -p cuda
-cd cuda
+cmake .. \
+-DCMAKE_BUILD_TYPE=Release \
+-DCMAKE_INSTALL_PREFIX=/usr \
+-DSUNSHINE_ASSETS_DIR=share/sunshine \
+-DSUNSHINE_EXECUTABLE_PATH=/usr/bin/sunshine \
+-DSUNSHINE_ENABLE_WAYLAND=ON \
+-DSUNSHINE_ENABLE_X11=ON \
+-DSUNSHINE_ENABLE_DRM=ON \
+-DSUNSHINE_ENABLE_CUDA=ON
 
-# Set environment variables
-export CUDA_VERSION="12.3.2"
-export CUDA_BUILD="525.60.13"
 
-# Download and install CUDA
-cuda_prefix="https://developer.download.nvidia.com/compute/cuda/"
-cuda_suffix=""
-if [[ "$(uname -m)" == 'aarch64' ]]; then
-  cuda_suffix="_sbsa"
-fi
-
-url="${cuda_prefix}${CUDA_VERSION}/local_installers/cuda_${CUDA_VERSION}_${CUDA_BUILD}_linux${cuda_suffix}.run"
-echo "Downloading CUDA from ${url}"
-wget "$url" --progress=bar:force:noscroll -q --show-progress -O cuda.run
-chmod +x cuda.run
-./cuda.run --silent --toolkit --toolkitpath=/build/cuda --no-opengl-libs --no-man-page --no-drm
-rm cuda.run
-
-cd ..
-
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_CUDA_COMPILER:PATH=/build/cuda/bin/nvcc -DSUNSHINE_ASSETS_DIR=share/sunshine -DSUNSHINE_EXECUTABLE_PATH=/usr/bin/sunshine -DSUNSHINE_ENABLE_WAYLAND=ON -DSUNSHINE_ENABLE_X11=ON -DSUNSHINE_ENABLE_DRM=ON -DSUNSHINE_ENABLE_CUDA=ON
 %make_build
 
 
 %install
 cd Sunshine
+cd build
 %make_install
 %clean
 
