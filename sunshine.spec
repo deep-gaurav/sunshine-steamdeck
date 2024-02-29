@@ -1,9 +1,9 @@
-%define commit e7eaa3ab636d8721de0869f8de527dd7b1de8a3b
+%define commit 42437344c2588062bd7d1a2fb8f323a1553eb944
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 %global build_timestamp %(date +"%Y%m%d")
 
-%global rel_build 3.git.%{build_timestamp}.%{shortcommit}%{?dist}
+%global rel_build 4.git.%{build_timestamp}.%{shortcommit}%{?dist}
 
 Name:           sunshine
 Version:        0.21.0
@@ -90,7 +90,7 @@ cmake .. \
 -DSUNSHINE_ENABLE_WAYLAND=ON \
 -DSUNSHINE_ENABLE_X11=ON \
 -DSUNSHINE_ENABLE_DRM=ON \
--DSUNSHINE_ENABLE_CUDA=ON
+-DSUNSHINE_ENABLE_CUDA=OFF
 
 
 %make_build
