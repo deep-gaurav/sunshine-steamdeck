@@ -1,12 +1,12 @@
-%define commit 42437344c2588062bd7d1a2fb8f323a1553eb944
+%define commit b78a717e2b9834a282534c17e001aee5daf19741
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 %global build_timestamp %(date +"%Y%m%d")
 
-%global rel_build 4.git.%{build_timestamp}.%{shortcommit}%{?dist}
+%global rel_build 1.git.%{build_timestamp}.%{shortcommit}%{?dist}
 
 Name:           sunshine
-Version:        0.21.0
+Version:        0.22.0
 Summary:        Sunshine is a self-hosted game stream host for Moonlight.
 Release:        %{rel_build}
 License:        GPLv3+
@@ -70,35 +70,21 @@ Sunshine is a self-hosted game stream host for Moonlight. Offering low latency, 
 
 
 %prep
-git clone --single-branch --branch nightly https://github.com/matte-schwartz/Sunshine.git
+git clone --single-branch --branch nightly https://github.com/LizardByte/Sunshine.git
 cd Sunshine
 git checkout %{commit}
 git submodule update --init --recursive
 npm install
 
-
 %build
 # Set up the build directory and run cmake and make
 cd Sunshine
-mkdir build
-cd build
-cmake .. \
--DCMAKE_BUILD_TYPE=Release \
--DCMAKE_INSTALL_PREFIX=/usr \
--DSUNSHINE_ASSETS_DIR=share/sunshine \
--DSUNSHINE_EXECUTABLE_PATH=/usr/bin/sunshine \
--DSUNSHINE_ENABLE_WAYLAND=ON \
--DSUNSHINE_ENABLE_X11=ON \
--DSUNSHINE_ENABLE_DRM=ON \
--DSUNSHINE_ENABLE_CUDA=OFF
-
-
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DSUNSHINE_ASSETS_DIR=share/sunshine -DSUNSHINE_EXECUTABLE_PATH=/usr/bin/sunshine -DSUNSHINE_ENABLE_WAYLAND=ON -DSUNSHINE_ENABLE_X11=ON -DSUNSHINE_ENABLE_DRM=ON -DSUNSHINE_ENABLE_CUDA=OFF
 %make_build
 
 
 %install
 cd Sunshine
-cd build
 %make_install
 %clean
 
