@@ -70,21 +70,35 @@ Sunshine is a self-hosted game stream host for Moonlight. Offering low latency, 
 
 
 %prep
-git clone --single-branch --branch nightly https://github.com/LizardByte/Sunshine.git
+git clone --single-branch --branch nightly https://github.com/matte-schwartz/Sunshine.git
 cd Sunshine
 git checkout %{commit}
 git submodule update --init --recursive
 npm install
 
+
 %build
 # Set up the build directory and run cmake and make
 cd Sunshine
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DSUNSHINE_ASSETS_DIR=share/sunshine -DSUNSHINE_EXECUTABLE_PATH=/usr/bin/sunshine -DSUNSHINE_ENABLE_WAYLAND=ON -DSUNSHINE_ENABLE_X11=ON -DSUNSHINE_ENABLE_DRM=ON -DSUNSHINE_ENABLE_CUDA=OFF
+mkdir build
+cd build
+cmake .. \
+-DCMAKE_BUILD_TYPE=Release \
+-DCMAKE_INSTALL_PREFIX=/usr \
+-DSUNSHINE_ASSETS_DIR=share/sunshine \
+-DSUNSHINE_EXECUTABLE_PATH=/usr/bin/sunshine \
+-DSUNSHINE_ENABLE_WAYLAND=ON \
+-DSUNSHINE_ENABLE_X11=ON \
+-DSUNSHINE_ENABLE_DRM=ON \
+-DSUNSHINE_ENABLE_CUDA=OFF
+
+
 %make_build
 
 
 %install
 cd Sunshine
+cd build
 %make_install
 %clean
 
