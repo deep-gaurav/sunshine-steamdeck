@@ -116,7 +116,7 @@ fi
 %files
 # Executables
 %{_bindir}/sunshine
-%{_bindir}/sunshine-0.21.0.%{shortcommit}
+%{_bindir}/sunshine-0.22.0.%{shortcommit}
 
 # Systemd unit file for user services
 %{_userunitdir}/sunshine.service
