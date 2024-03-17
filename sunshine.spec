@@ -1,4 +1,4 @@
-%define commit b78a717e2b9834a282534c17e001aee5daf19741
+%define commit e83a4d5e2b741d09355a93eae2aaca7cc32f07e9
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 %global build_timestamp %(date +"%Y%m%d")
@@ -6,7 +6,7 @@
 %global rel_build 1.git.%{build_timestamp}.%{shortcommit}%{?dist}
 
 Name:           sunshine
-Version:        0.22.0
+Version:        0.22.2
 Summary:        Sunshine is a self-hosted game stream host for Moonlight.
 Release:        %{rel_build}
 License:        GPLv3+
@@ -14,6 +14,7 @@ URL:            https://github.com/LizardByte/Sunshine
 
 BuildRequires:  boost-devel
 BuildRequires:  cmake
+BuildRequires:  cuda-toolkit-12-4
 BuildRequires:  gcc
 BuildRequires:  gcc-c++
 BuildRequires:  intel-mediasdk-devel
@@ -78,27 +79,31 @@ npm install
 
 
 %build
-# Set up the build directory and run cmake and make
-cd Sunshine
-mkdir build
-cd build
+# Dynamically locate nvcc
+export PATH=/usr/local/cuda-12.4/bin:${PATH}
+export LD_LIBRARY_PATH=/usr/local/cuda-12.4/lib64:${LD_LIBRARY_PATH}
+NVCC_PATH=$(which nvcc)
+
+# Set up the build directory for Sunshine and configure the build with cmake
+mkdir -p %{_builddir}/Sunshine/build
+cd %{_builddir}/Sunshine/build
+
+# Configure cmake with CUDA paths and other options
 cmake .. \
 -DCMAKE_BUILD_TYPE=Release \
--DCMAKE_INSTALL_PREFIX=/usr \
--DSUNSHINE_ASSETS_DIR=share/sunshine \
--DSUNSHINE_EXECUTABLE_PATH=/usr/bin/sunshine \
+-DCMAKE_INSTALL_PREFIX=%{_prefix} \
+-DCMAKE_CUDA_COMPILER=$NVCC_PATH \
+-DCMAKE_CUDA_FLAGS="-Xcompiler -fPIC" \
+-DSUNSHINE_ASSETS_DIR=%{_datadir}/sunshine \
+-DSUNSHINE_EXECUTABLE_PATH=%{_bindir}/sunshine \
 -DSUNSHINE_ENABLE_WAYLAND=ON \
 -DSUNSHINE_ENABLE_X11=ON \
 -DSUNSHINE_ENABLE_DRM=ON \
--DSUNSHINE_ENABLE_CUDA=OFF
-
-
+-DSUNSHINE_ENABLE_CUDA=ON
 %make_build
 
-
 %install
-cd Sunshine
-cd build
+cd %{_builddir}/Sunshine/build
 %make_install
 %clean
 
@@ -116,13 +121,13 @@ fi
 %files
 # Executables
 %{_bindir}/sunshine
-%{_bindir}/sunshine-0.22.0.%{shortcommit}
+%{_bindir}/sunshine-%{version}.%{shortcommit}
 
 # Systemd unit file for user services
 %{_userunitdir}/sunshine.service
 
 # Udev rules
-%{_udevrulesdir}/85-sunshine.rules
+%{_udevrulesdir}/60-sunshine.rules
 
 # Desktop entries
 %{_datadir}/applications/sunshine.desktop
