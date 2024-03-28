@@ -1,4 +1,4 @@
-%define commit e83a4d5e2b741d09355a93eae2aaca7cc32f07e9
+%define commit aad3927c5a06062d5bc99a114e4df50406a33236
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 %global build_timestamp %(date +"%Y%m%d")
@@ -92,14 +92,16 @@ cd %{_builddir}/Sunshine/build
 cmake .. \
 -DCMAKE_BUILD_TYPE=Release \
 -DCMAKE_INSTALL_PREFIX=%{_prefix} \
+%if 0%{?fedora} == 39
 -DCMAKE_CUDA_COMPILER=$NVCC_PATH \
 -DCMAKE_CUDA_FLAGS="-Xcompiler -fPIC" \
+-DSUNSHINE_ENABLE_CUDA=ON \
+%endif
 -DSUNSHINE_ASSETS_DIR=%{_datadir}/sunshine \
 -DSUNSHINE_EXECUTABLE_PATH=%{_bindir}/sunshine \
 -DSUNSHINE_ENABLE_WAYLAND=ON \
 -DSUNSHINE_ENABLE_X11=ON \
--DSUNSHINE_ENABLE_DRM=ON \
--DSUNSHINE_ENABLE_CUDA=ON
+-DSUNSHINE_ENABLE_DRM=ON 
 %make_build
 
 %install
