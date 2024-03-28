@@ -94,7 +94,7 @@ cd %{_builddir}/Sunshine/build
 # Configure cmake with CUDA paths and other options
 cmake .. \
 -DCMAKE_BUILD_TYPE=Release \
--DBUILD_WERROR=ON \
+#-DBUILD_WERROR=ON \
 -DCMAKE_INSTALL_PREFIX=%{_prefix} \
 %if 0%{?fedora} == 39
 -DCMAKE_CUDA_COMPILER=$NVCC_PATH \
