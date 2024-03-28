@@ -92,9 +92,6 @@ cd %{_builddir}/Sunshine/build
 cmake .. \
 -DCMAKE_BUILD_TYPE=Release \
 -DBUILD_WERROR=ON \
--DCMAKE_CXX_FLAGS="-fPIE" \
--DCMAKE_C_FLAGS="-fPIE" \
--DCMAKE_EXE_LINKER_FLAGS="-pie" \
 -DCMAKE_INSTALL_PREFIX=%{_prefix} \
 %if 0%{?fedora} == 39
 -DCMAKE_CUDA_COMPILER=$NVCC_PATH \
