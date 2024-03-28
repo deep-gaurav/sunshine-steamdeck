@@ -15,6 +15,7 @@ URL:            https://github.com/LizardByte/Sunshine
 BuildRequires:  boost-devel
 BuildRequires:  cmake
 BuildRequires:  cuda-toolkit-12-4
+BuildRequires:  doxygen
 BuildRequires:  gcc
 BuildRequires:  gcc-c++
 BuildRequires:  intel-mediasdk-devel
@@ -36,6 +37,7 @@ BuildRequires:  libXinerama-devel
 BuildRequires:  libXrandr-devel
 BuildRequires:  libXtst-devel
 BuildRequires:  git
+BuildRequires:  graphviz
 BuildRequires:  mesa-libGL-devel
 BuildRequires:  miniupnpc-devel
 BuildRequires:  npm
@@ -43,6 +45,7 @@ BuildRequires:  numactl-devel
 BuildRequires:  openssl-devel
 BuildRequires:  opus-devel
 BuildRequires:  pulseaudio-libs-devel
+BuildRequires:  python3.11
 BuildRequires:  rpm-build
 BuildRequires:  systemd-udev
 BuildRequires:  wget
