@@ -1,9 +1,10 @@
-%define commit c53920a073e21ef1e4d5a673dddb85cc29c88391
+%define commit 5ad7643da19b03f26a78c5cbae2bce4a9b1890fd
+%undefine _hardened_build
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 %global build_timestamp %(date +"%Y%m%d")
 
-%global rel_build 1.git.%{build_timestamp}.%{shortcommit}%{?dist}
+%global rel_build 2.git.%{build_timestamp}.%{shortcommit}%{?dist}
 
 Name:           sunshine
 Version:        0.22.2
@@ -74,7 +75,7 @@ Sunshine is a self-hosted game stream host for Moonlight. Offering low latency, 
 
 
 %prep
-git clone --single-branch --branch nightly https://github.com/matte-schwartz/Sunshine.git
+git clone --single-branch --branch disable-hardening https://github.com/matte-schwartz/Sunshine.git
 cd Sunshine
 git checkout %{commit}
 git submodule update --init --recursive
@@ -97,7 +98,6 @@ cmake .. \
 -DCMAKE_INSTALL_PREFIX=%{_prefix} \
 %if 0%{?fedora} == 39
 -DCMAKE_CUDA_COMPILER=$NVCC_PATH \
--DCMAKE_CUDA_FLAGS="-Xcompiler -fPIC" \
 -DSUNSHINE_ENABLE_CUDA=ON \
 %endif
 -DSUNSHINE_ASSETS_DIR=%{_datadir}/sunshine \
