@@ -149,7 +149,7 @@ fi
 %files
 # Executables
 %{_bindir}/sunshine
-%{_bindir}/sunshine-%{version}
+%{_bindir}/sunshine-%{version}.*
 
 # Systemd unit file for user services
 %{_userunitdir}/sunshine.service
