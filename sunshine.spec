@@ -1,15 +1,12 @@
 %undefine _hardened_build
-%define commit 55657b6cb11d1cbff5e70887313ee708fdc4f213
-%global shortcommit %(c=%{commit}; echo ${c:0:7})
+%define commit bd5c50041cc020f648a45f8130ed421f2c8fc901
 
 %global build_timestamp %(date +"%Y%m%d")
-
-%global rel_build 2.git.%{build_timestamp}.%{shortcommit}%{?dist}
 
 Name:           sunshine
 Version:        0.22.2
 Summary:        Sunshine is a self-hosted game stream host for Moonlight.
-Release:        %{rel_build}
+Release:        3%{?dist}
 License:        GPLv3+
 URL:            https://github.com/LizardByte/Sunshine
 
@@ -131,14 +128,18 @@ if [ -x "$path_to_setcap" ] ; then
 fi
 
 # Add firewall rules to allow traffic on the required ports
-firewall-cmd --permanent --add-port=47984-47990/tcp
-firewall-cmd --permanent --add-port=48010/tcp
-firewall-cmd --permanent --add-port=47998-48000/udp
-firewall-cmd --reload
+if [ ! -x "$(command -v rpm-ostree)" ]; then
+    # We're not in an rpm-ostree environment, proceed with firewall rules
+    firewall-cmd --permanent --add-port=47984-47990/tcp
+    firewall-cmd --permanent --add-port=48010/tcp
+    firewall-cmd --permanent --add-port=47998-48000/udp
+    firewall-cmd --reload
+fi
 
 %preun
 # Remove the firewall rules if the package is being uninstalled, not upgraded
-if [ $1 -eq 0 ]; then
+if [ ! -x "$(command -v rpm-ostree)" ] && [ $1 -eq 0 ]; then
+    # We're not in an rpm-ostree environment and the package is being uninstalled, not upgraded
     firewall-cmd --permanent --remove-port=47984-47990/tcp
     firewall-cmd --permanent --remove-port=48010/tcp
     firewall-cmd --permanent --remove-port=47998-48000/udp
@@ -148,7 +149,7 @@ fi
 %files
 # Executables
 %{_bindir}/sunshine
-%{_bindir}/sunshine-%{version}.%{shortcommit}
+%{_bindir}/sunshine-%{version}
 
 # Systemd unit file for user services
 %{_userunitdir}/sunshine.service
