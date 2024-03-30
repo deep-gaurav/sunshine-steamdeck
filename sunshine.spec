@@ -1,5 +1,5 @@
-%define commit 5ad7643da19b03f26a78c5cbae2bce4a9b1890fd
 %undefine _hardened_build
+%define commit 55657b6cb11d1cbff5e70887313ee708fdc4f213
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 %global build_timestamp %(date +"%Y%m%d")
@@ -75,7 +75,7 @@ Sunshine is a self-hosted game stream host for Moonlight. Offering low latency, 
 
 
 %prep
-git clone --single-branch --branch disable-hardening https://github.com/matte-schwartz/Sunshine.git
+git clone --single-branch --branch nightly https://github.com/matte-schwartz/Sunshine.git
 cd Sunshine
 git checkout %{commit}
 git submodule update --init --recursive
@@ -93,18 +93,27 @@ mkdir -p %{_builddir}/Sunshine/build
 cd %{_builddir}/Sunshine/build
 
 # Configure cmake with CUDA paths and other options
+%if 0%{?fedora} == 39
 cmake .. \
 -DCMAKE_BUILD_TYPE=Release \
 -DCMAKE_INSTALL_PREFIX=%{_prefix} \
-%if 0%{?fedora} == 39
 -DCMAKE_CUDA_COMPILER=$NVCC_PATH \
 -DSUNSHINE_ENABLE_CUDA=ON \
-%endif
 -DSUNSHINE_ASSETS_DIR=%{_datadir}/sunshine \
 -DSUNSHINE_EXECUTABLE_PATH=%{_bindir}/sunshine \
 -DSUNSHINE_ENABLE_WAYLAND=ON \
 -DSUNSHINE_ENABLE_X11=ON \
--DSUNSHINE_ENABLE_DRM=ON 
+-DSUNSHINE_ENABLE_DRM=ON
+%else
+cmake .. \
+-DCMAKE_BUILD_TYPE=Release \
+-DCMAKE_INSTALL_PREFIX=%{_prefix} \
+-DSUNSHINE_ASSETS_DIR=%{_datadir}/sunshine \
+-DSUNSHINE_EXECUTABLE_PATH=%{_bindir}/sunshine \
+-DSUNSHINE_ENABLE_WAYLAND=ON \
+-DSUNSHINE_ENABLE_X11=ON \
+-DSUNSHINE_ENABLE_DRM=ON
+%endif
 %make_build
 
 %install
@@ -114,13 +123,26 @@ cd %{_builddir}/Sunshine/build
 
 %post
 
-#!/bin/sh
-
 # Ensure Sunshine can grab images from KMS
 path_to_setcap=$(which setcap)
 if [ -x "$path_to_setcap" ] ; then
   echo "$path_to_setcap cap_sys_admin+p /usr/bin/sunshine"
 	$path_to_setcap cap_sys_admin+p $(readlink -f /usr/bin/sunshine)
+fi
+
+# Add firewall rules to allow traffic on the required ports
+firewall-cmd --permanent --add-port=47984-47990/tcp
+firewall-cmd --permanent --add-port=48010/tcp
+firewall-cmd --permanent --add-port=47998-48000/udp
+firewall-cmd --reload
+
+%preun
+# Remove the firewall rules if the package is being uninstalled, not upgraded
+if [ $1 -eq 0 ]; then
+    firewall-cmd --permanent --remove-port=47984-47990/tcp
+    firewall-cmd --permanent --remove-port=48010/tcp
+    firewall-cmd --permanent --remove-port=47998-48000/udp
+    firewall-cmd --reload
 fi
 
 %files
