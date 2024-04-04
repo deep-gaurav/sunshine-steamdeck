@@ -72,7 +72,7 @@ Sunshine is a self-hosted game stream host for Moonlight. Offering low latency, 
 
 
 %prep
-git clone --single-branch --branch nightly https://github.com/matte-schwartz/Sunshine.git
+git clone --single-branch --branch nightly https://github.com/deep-gaurav/Sunshine.git
 cd Sunshine
 git checkout %{commit}
 git submodule update --init --recursive
